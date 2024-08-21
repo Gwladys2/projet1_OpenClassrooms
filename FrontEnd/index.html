@@ -34,53 +34,21 @@
 			<p>En cas de besoin, une équipe pluridisciplinaire peut-être constituée : architecte DPLG, décorateur(trice)</p>
 		</article>
 	</section>
+
+	<!-- Section des filtres -->
+	<section id="filters">
+		<h2>Filtres</h2>
+		<div id="category-filters">
+			<!-- Les filtres seront ajoutés dynamiquement ici via JavaScript -->
+		</div>
+	</section>
+
+
 	<section id="portfolio">
 		<h2>Mes Projets</h2>
-		<div class="gallery">
-			<figure>
-				<img src="assets/images/abajour-tahina.png" alt="Abajour Tahina">
-				<figcaption>Abajour Tahina</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/appartement-paris-v.png" alt="Appartement Paris V">
-				<figcaption>Appartement Paris V</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/restaurant-sushisen-londres.png" alt="Restaurant Sushisen - Londres">
-				<figcaption>Restaurant Sushisen - Londres</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/la-balisiere.png" alt="Villa “La Balisiere” - Port Louis">
-				<figcaption>Villa “La Balisiere” - Port Louis</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/structures-thermopolis.png" alt="Structures Thermopolis">
-				<figcaption>Structures Thermopolis</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/appartement-paris-x.png" alt="Appartement Paris X">
-				<figcaption>Appartement Paris X</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/le-coteau-cassis.png" alt="Pavillon “Le coteau” - Cassis">
-				<figcaption>Pavillon “Le coteau” - Cassis</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/villa-ferneze.png" alt="Villa Ferneze - Isola d’Elba">
-				<figcaption>Villa Ferneze - Isola d’Elba</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/appartement-paris-xviii.png" alt="Appartement Paris XVIII">
-				<figcaption>Appartement Paris XVIII</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/bar-lullaby-paris.png" alt="Bar “Lullaby” - Paris">
-				<figcaption>Bar “Lullaby” - Paris</figcaption>
-			</figure>
-			<figure>
-				<img src="assets/images/hotel-first-arte-new-delhi.png" alt="Hotel First Arte - New Delhi">
-				<figcaption>Hotel First Arte - New Delhi</figcaption>
-			</figure>
+
+		<div class="gallery"  id="project-gallery">
+
 		</div>
 	</section>
 	<section id="contact">
@@ -105,5 +73,120 @@
 		</ul>
 	</nav>
 </footer>
+ <script>
+	 // URL de l'API pour récupérer les projets
+	 const worksUrl = 'http://localhost:5678/api/works'; // L'URL pour récupérer les données des projets
+
+	 // URL de l'API pour récupérer les catégories
+	 const categoriesUrl = 'http://localhost:5678/api/categories'; // L'URL pour récupérer les données des catégories
+
+	 // Fonction pour récupérer et afficher les projets
+	 function displayProjects(filteredProjects) {
+		 const gallery = document.getElementById('project-gallery'); // Sélectionne l'élément DOM où les projets seront affichés
+		 gallery.innerHTML = ''; // Vide l'élément galerie avant d'ajouter les nouveaux éléments
+
+		 if (Array.isArray(filteredProjects)) { // Vérifie si `filteredProjects` est un tableau
+			 filteredProjects.forEach(project => { // Parcourt chaque projet dans `filteredProjects`
+				 if (project.title && typeof project.title === 'string' && project.imageUrl && typeof project.imageUrl === 'string') {
+					 // Vérifie que le projet a une propriété `title` de type chaîne de caractères et une propriété `imageUrl` de type chaîne de caractères
+					 const figure = document.createElement('figure'); // Crée un élément `figure` pour contenir l'image et le titre du projet
+
+					 const img = document.createElement('img'); // Crée un élément `img` pour afficher l'image du projet
+					 img.src = project.imageUrl; // Définit l'URL de l'image avec l'URL reçue de l'API
+					 img.alt = project.title; // Utilise le titre du projet comme texte alternatif pour l'image
+
+					 const figcaption = document.createElement('figcaption'); // Crée un élément `figcaption` pour le titre du projet
+					 figcaption.textContent = project.title; // Définit le texte du `figcaption` comme étant le titre du projet
+
+					 figure.appendChild(img); // Ajoute l'image au `figure`
+					 figure.appendChild(figcaption); // Ajoute le titre au `figure`
+
+					 gallery.appendChild(figure); // Ajoute le `figure` complet à la galerie
+				 } else {
+					 console.warn('Propriétés `title` ou `imageUrl` manquantes ou invalides pour un projet:', project);
+					 // Si les propriétés `title` ou `imageUrl` sont manquantes ou invalides, affiche un avertissement dans la console
+				 }
+			 });
+		 } else {
+			 console.error('Les données reçues ne sont pas un tableau:', filteredProjects); // Si `filteredProjects` n'est pas un tableau, affiche une erreur
+		 }
+	 }
+
+	 // Fonction pour récupérer et afficher les filtres
+	 fetch(categoriesUrl) // Envoie une requête HTTP GET à `categoriesUrl` pour récupérer les données des catégories
+			 .then(response => {
+				 if (!response.ok) { // Vérifie si la réponse HTTP indique une erreur
+					 throw new Error('Erreur HTTP ! statut: ' + response.status); // Si oui, lance une exception avec le statut d'erreur
+				 }
+				 return response.json(); // Si la réponse est correcte, convertit la réponse en un objet JavaScript (JSON)
+			 })
+			 .then(categories => {
+				 const filtersContainer = document.getElementById('category-filters'); // Sélectionne l'élément DOM où les filtres de catégories seront affichés
+				 const allFilter = document.createElement('button'); // Crée un bouton pour le filtre "Tous"
+				 allFilter.textContent = 'Tous'; // Définit le texte du bouton comme "Tous"
+				 allFilter.addEventListener('click', () => fetchAndDisplayProjects()); // Ajoute un événement pour charger tous les projets quand le bouton est cliqué
+				 filtersContainer.appendChild(allFilter); // Ajoute le bouton "Tous" au conteneur de filtres
+
+				 if (Array.isArray(categories)) { // Vérifie si `categories` est un tableau
+					 categories.forEach(category => { // Parcourt chaque catégorie dans `categories`
+						 if (category.name && typeof category.name === 'string') { // Vérifie que la catégorie a une propriété `name` de type chaîne de caractères
+							 const button = document.createElement('button'); // Crée un bouton pour chaque catégorie
+							 button.textContent = category.name; // Définit le texte du bouton comme le nom de la catégorie
+							 button.addEventListener('click', () => filterProjectsByCategory(category.id));
+							 // Ajoute un événement pour filtrer les projets par catégorie quand le bouton est cliqué
+							 filtersContainer.appendChild(button); // Ajoute le bouton de la catégorie au conteneur de filtres
+						 } else {
+							 console.warn('Propriété `name` manquante ou invalide pour une catégorie:', category);
+							 // Si la propriété `name` est manquante ou invalide, affiche un avertissement dans la console
+						 }
+					 });
+				 } else {
+					 console.error('Les données reçues ne sont pas un tableau:', categories); // Si `categories` n'est pas un tableau, affiche une erreur
+				 }
+			 })
+			 .catch(error => { // Capture les erreurs pouvant survenir lors de la requête ou du traitement des données
+				 console.error('Erreur lors de la récupération des catégories :', error); // Affiche un message d'erreur dans la console
+			 });
+
+	 // Fonction pour récupérer et afficher les projets filtrés par catégorie
+	 function filterProjectsByCategory(categoryId) {
+		 fetch(worksUrl) // Envoie une requête HTTP GET à `worksUrl` pour récupérer les données des projets
+				 .then(response => {
+					 if (!response.ok) { // Vérifie si la réponse HTTP indique une erreur
+						 throw new Error('Erreur HTTP ! statut: ' + response.status); // Si oui, lance une exception avec le statut d'erreur
+					 }
+					 return response.json(); // Si la réponse est correcte, convertit la réponse en un objet JavaScript (JSON)
+				 })
+				 .then(projects => {
+					 const filteredProjects = projects.filter(project => project.categoryId === categoryId);
+					 // Filtre les projets en fonction de l'ID de la catégorie
+					 displayProjects(filteredProjects); // Affiche les projets filtrés en appelant `displayProjects`
+				 })
+				 .catch(error => { // Capture les erreurs pouvant survenir lors de la requête ou du traitement des données
+					 console.error('Erreur lors de la récupération des projets :', error); // Affiche un message d'erreur dans la console
+				 });
+	 }
+
+	 // Fonction pour récupérer et afficher tous les projets
+	 function fetchAndDisplayProjects() {
+		 fetch(worksUrl) // Envoie une requête HTTP GET à `worksUrl` pour récupérer les données des projets
+				 .then(response => {
+					 if (!response.ok) { // Vérifie si la réponse HTTP indique une erreur
+						 throw new Error('Erreur HTTP ! statut: ' + response.status); // Si oui, lance une exception avec le statut d'erreur
+					 }
+					 return response.json(); // Si la réponse est correcte, convertit la réponse en un objet JavaScript (JSON)
+				 })
+				 .then(projects => {
+					 displayProjects(projects); // Affiche tous les projets en appelant `displayProjects`
+				 })
+				 .catch(error => { // Capture les erreurs pouvant survenir lors de la requête ou du traitement des données
+					 console.error('Erreur lors de la récupération des projets :', error); // Affiche un message d'erreur dans la console
+				 });
+	 }
+
+	 // Charger et afficher tous les projets au démarrage
+	 fetchAndDisplayProjects(); // Appelle `fetchAndDisplayProjects` pour charger et afficher tous les projets lors du chargement de la page
+
+ </script>
 </body>
 </html>
