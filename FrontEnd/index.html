@@ -17,7 +17,11 @@
 		<ul>
 			<li>projets</li>
 			<li>contact</li>
-			<li>login</li>
+			<li id="login-btn" style="display: none;"><a href="login.html">Login</a></li>
+			<!-- Bouton de déconnexion, caché par défaut -->
+			<li id="logout-btn" style="display: none;"><a id="logout">Logout</a></li>
+
+
 			<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
 		</ul>
 	</nav>
@@ -37,7 +41,7 @@
 
 	<!-- Section des filtres -->
 	<section id="filters">
-		<h2>Filtres</h2>
+		<h2>Mes projets</h2>
 		<div id="category-filters">
 			<!-- Les filtres seront ajoutés dynamiquement ici via JavaScript -->
 		</div>
@@ -45,7 +49,7 @@
 
 
 	<section id="portfolio">
-		<h2>Mes Projets</h2>
+
 
 		<div class="gallery"  id="project-gallery">
 
@@ -122,15 +126,31 @@
 			 })
 			 .then(categories => {
 				 const filtersContainer = document.getElementById('category-filters'); // Sélectionne l'élément DOM où les filtres de catégories seront affichés
-				 const allFilter = document.createElement('button'); // Crée un bouton pour le filtre "Tous"
-				 allFilter.textContent = 'Tous'; // Définit le texte du bouton comme "Tous"
+				 filtersContainer.style.display="flex";
+				 filtersContainer.style.gap="10px";
+
+
+				 const allFilter = document.createElement('div'); // Crée une div pour le filtre "Tous"
+				 allFilter.textContent = 'Tous'; // Définit le texte de la div comme "Tous"
+				 allFilter.style.backgroundColor="#1D6154";
+				 allFilter.style.color="white";
+				 allFilter.style.padding="10px";
+				 allFilter.style.cursor="pointer";
+				 allFilter.style.borderRadius="15px";
+
 				 allFilter.addEventListener('click', () => fetchAndDisplayProjects()); // Ajoute un événement pour charger tous les projets quand le bouton est cliqué
 				 filtersContainer.appendChild(allFilter); // Ajoute le bouton "Tous" au conteneur de filtres
 
 				 if (Array.isArray(categories)) { // Vérifie si `categories` est un tableau
 					 categories.forEach(category => { // Parcourt chaque catégorie dans `categories`
 						 if (category.name && typeof category.name === 'string') { // Vérifie que la catégorie a une propriété `name` de type chaîne de caractères
-							 const button = document.createElement('button'); // Crée un bouton pour chaque catégorie
+							 const button = document.createElement('div');// Crée une div pour chaque catégorie
+
+							 button.style.backgroundColor="#1D6154";
+							 button.style.color="white";
+							 button.style.padding="10px";
+							 button.style.cursor="pointer";
+							 button.style.borderRadius="15px";
 							 button.textContent = category.name; // Définit le texte du bouton comme le nom de la catégorie
 							 button.addEventListener('click', () => filterProjectsByCategory(category.id));
 							 // Ajoute un événement pour filtrer les projets par catégorie quand le bouton est cliqué
@@ -186,6 +206,32 @@
 
 	 // Charger et afficher tous les projets au démarrage
 	 fetchAndDisplayProjects(); // Appelle `fetchAndDisplayProjects` pour charger et afficher tous les projets lors du chargement de la page
+
+	 function checkAuthStatus() {
+		 const authToken = localStorage.getItem('authToken');
+		 const modal = document.getElementById('modal');
+		 if (authToken) {
+			 document.getElementById('login-btn').style.display = 'none';
+			 document.getElementById('logout-btn').style.display = 'block';
+
+
+		 } else {
+			 document.getElementById('login-btn').style.display = 'block';
+			 document.getElementById('logout-btn').style.display = 'none';
+		 }
+	 }
+
+	 // Appelle la fonction au chargement de la page
+	 checkAuthStatus();
+
+	 document.getElementById('logout-btn')?.addEventListener('click', function() {
+		 // Supprimer le token du localStorage
+		 localStorage.removeItem('authToken');
+
+		 // Réinitialiser l'état de connexion
+		 checkAuthStatus();
+	 });
+
 
  </script>
 </body>

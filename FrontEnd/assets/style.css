@@ -46,6 +46,17 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+
+a {
+	color: black;
+	text-decoration: none;
+	font-family: 'Syne';
+}
+
+a:hover{
+	color: #B1663C;
+}
+
 /** end reset css**/
 body {
 	max-width: 1140px;
@@ -179,6 +190,10 @@ input[type="submit"]{
 	text-align: center;
 	border-radius: 60px ;
 }
+#category-filters{
+	margin-top: 40px;
+}
+
 
 footer nav ul {
 	display: flex;
