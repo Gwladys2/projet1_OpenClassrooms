@@ -104,6 +104,7 @@ nav ul {
 nav li {
 	padding: 0 10px;
 	font-size: 1.2em;
+	cursor: pointer;
 }
 
 li:hover {
@@ -194,6 +195,16 @@ input[type="submit"]{
 	margin-top: 40px;
 }
 
+#filters{
+	text-align: center;
+}
+
+#modifier{
+	font-size: 20px;
+	margin-left: 400px;
+	cursor: pointer;
+
+}
 
 footer nav ul {
 	display: flex;

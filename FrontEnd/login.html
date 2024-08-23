@@ -37,7 +37,7 @@
 </header>
 <main>
     <!-- Section de connexion -->
-    <section id="login">
+    <section id="contact">
         <h2>Login</h2>
         <!-- Formulaire de connexion -->
         <form id="login-form" method="post">
@@ -50,6 +50,9 @@
             <!-- Bouton de soumission du formulaire -->
             <input type="submit" value="Se connecter">
         </form>
+
+        <div id="error-message" style="display:none;"></div>
+
     </section>
 </main>
 <footer>
@@ -100,9 +103,13 @@
                     body: JSON.stringify(credentials)
                 });
 
+                const errorMessage=document.getElementById('error-message');
+
                 if (!response.ok) {
                     // Si la réponse n'est pas correcte, lever une erreur
-                    throw new Error('Erreur HTTP: ' + response.status);
+                    errorMessage.textContent='Erreur HTTP'+ response.status;
+                    errorMessage.style.display='block';
+                    errorMessage.style.color='red';
                 }
 
                 const data = await response.json();
@@ -115,12 +122,16 @@
                     window.location.href = 'index.html';
                 } else {
                     // Affiche une alerte si les identifiants sont incorrects
-                    alert('Identifiants incorrects');
+                    errorMessage.textContent='Identifiants incorrects';
+                    errorMessage.style.display='block';
+                    errorMessage.style.color='red';
                 }
             } catch (error) {
                 // Gestion des erreurs lors de la tentative de connexion
-                console.error('Erreur lors de la tentative de connexion:', error);
-                alert('Une erreur est survenue lors de la connexion. Veuillez réessayer.');
+               const errorMessage=document.getElementById('error-message');
+               errorMessage.textContent='Une erreur est survenue lors de la connexion, veuillez réessayer';
+               errorMessage.style.display='block';
+               errorMessage.style.color='red';
             }
         });
 

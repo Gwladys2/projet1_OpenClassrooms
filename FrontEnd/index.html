@@ -9,6 +9,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans&display=swap" rel="stylesheet">
 	<meta name="description" content="">
 	<link rel="stylesheet" href="./assets/style.css">
+	<link rel="stylesheet" href="./assets/modale.css">
 </head>
 <body>
 <header>
@@ -42,6 +43,8 @@
 	<!-- Section des filtres -->
 	<section id="filters">
 		<h2>Mes projets</h2>
+
+		<div id="modifier">Modifier</div>
 		<div id="category-filters">
 			<!-- Les filtres seront ajoutés dynamiquement ici via JavaScript -->
 		</div>
@@ -49,7 +52,6 @@
 
 
 	<section id="portfolio">
-
 
 		<div class="gallery"  id="project-gallery">
 
@@ -68,6 +70,15 @@
 			<input type="submit" value="Envoyer">
 		</form>
 	</section>
+
+	<div id="modal" class="modal" style="display: none">
+		<div class="modal-content">
+			<span id="close-modal" class="close">&times; </span>
+			<h2> modifier</h2>
+			<div class="gallery" id="modal-gallery"></div>
+		</div>
+
+	</div>
 </main>
 
 <footer>
@@ -209,15 +220,17 @@
 
 	 function checkAuthStatus() {
 		 const authToken = localStorage.getItem('authToken');
-		 const modal = document.getElementById('modal');
+
 		 if (authToken) {
 			 document.getElementById('login-btn').style.display = 'none';
 			 document.getElementById('logout-btn').style.display = 'block';
+			 document.getElementById('modifier').style.display='block';
 
 
 		 } else {
 			 document.getElementById('login-btn').style.display = 'block';
 			 document.getElementById('logout-btn').style.display = 'none';
+			 document.getElementById('modifier').style.display='none';
 		 }
 	 }
 
@@ -230,6 +243,124 @@
 
 		 // Réinitialiser l'état de connexion
 		 checkAuthStatus();
+	 });
+
+
+	 function displayProjectsInModal(projects) {
+		 // Déclare une fonction nommée `displayProjectsInModal` qui prend en paramètre une variable `projects`.
+
+		 const modalGallery = document.getElementById('modal-gallery');
+		 // Récupère l'élément HTML avec l'ID 'modal-gallery' et le stocke dans la constante `modalGallery`.
+
+		 modalGallery.innerHTML = '';
+		 // Réinitialise le contenu HTML de `modalGallery`, en le vidant de tout élément précédent.
+
+		 if (Array.isArray(projects)) {
+			 // Vérifie si `projects` est un tableau à l'aide de la méthode `Array.isArray`.
+
+			 projects.forEach(project => {
+				 // Si `projects` est un tableau, utilise `forEach` pour parcourir chaque élément du tableau.
+
+				 if (project.title && typeof project.title === 'string' && project.imageUrl && typeof project.imageUrl === 'string') {
+					 // Vérifie si chaque projet a une propriété `title` de type chaîne de caractères
+					 // et une propriété `imageUrl` de type chaîne de caractères.
+
+					 const figure = document.createElement('figure');
+					 // Crée un nouvel élément HTML `figure` et le stocke dans la variable `figure`.
+
+					 const img = document.createElement('img');
+					 // Crée un nouvel élément HTML `img` et le stocke dans la variable `img`.
+
+					 img.src = project.imageUrl;
+					 // Assigne l'URL de l'image `imageUrl` du projet à l'attribut `src` de l'élément `img`.
+
+					 img.alt = project.title;
+					 // Assigne le titre du projet à l'attribut `alt` de l'élément `img` pour l'accessibilité.
+
+					 const figcaption = document.createElement('figcaption');
+					 // Crée un nouvel élément HTML `figcaption` et le stocke dans la variable `figcaption`.
+
+					 figcaption.textContent = project.title;
+					 // Assigne le titre du projet au contenu texte de l'élément `figcaption`.
+
+					 figure.appendChild(img);
+					 // Ajoute l'élément `img` comme enfant de l'élément `figure`.
+
+					 figure.appendChild(figcaption);
+					 // Ajoute l'élément `figcaption` comme enfant de l'élément `figure`.
+
+					 modalGallery.appendChild(figure);
+					 // Ajoute l'élément `figure` comme enfant de l'élément `modalGallery`, intégrant ainsi
+					 // l'image et la légende dans la galerie modale.
+
+				 } else {
+					 console.warn('Propriétés `title` ou `imageUrl` manquantes ou invalides pour un projet:', project);
+					 // Si le projet n'a pas de `title` ou de `imageUrl` valides, affiche un avertissement dans la console
+					 // indiquant les propriétés manquantes ou invalides.
+				 }
+			 });
+		 } else {
+			 console.error('Les données reçues ne sont pas un tableau:', projects);
+			 // Si `projects` n'est pas un tableau, affiche une erreur dans la console indiquant que les données ne sont pas valides.
+		 }
+	 }
+
+
+
+	 document.addEventListener("DOMContentLoaded", function() {
+		 // Ajoute un écouteur d'événement pour exécuter la fonction une fois que le DOM (Document Object Model)
+		 // est entièrement chargé, assurant que tous les éléments HTML sont accessibles.
+
+		 const modifierButton = document.getElementById("modifier");
+		 // Récupère l'élément HTML avec l'ID 'modifier' (un bouton) et le stocke dans la constante `modifierButton`.
+
+		 const modal = document.getElementById("modal");
+		 // Récupère l'élément HTML avec l'ID 'modal' (la fenêtre modale) et le stocke dans la constante `modal`.
+
+		 const closeModal = document.getElementById("close-modal");
+		 // Récupère l'élément HTML avec l'ID 'close-modal' (le bouton pour fermer la modale) et le stocke dans la constante `closeModal`.
+
+		 modifierButton.addEventListener("click", function() {
+			 // Ajoute un écouteur d'événement 'click' au bouton `modifierButton` pour exécuter la fonction lorsque le bouton est cliqué.
+
+			 modal.style.display = "block";
+			 // Affiche la modale en définissant son style `display` à "block", ce qui la rend visible.
+
+			 // Récupérer et afficher les projets dans la modale
+			 fetch(worksUrl)
+					 // Effectue une requête HTTP GET à l'URL spécifiée par `worksUrl` pour récupérer les projets.
+
+					 .then(response => {
+						 if (!response.ok) {
+							 throw new Error('Erreur HTTP ! statut: ' + response.status);
+							 // Si la réponse HTTP n'est pas OK (statut différent de 200-299), génère une erreur avec le statut de la réponse.
+						 }
+						 return response.json();
+						 // Convertit la réponse en JSON, accessible dans le prochain bloc `then`.
+					 })
+					 .then(projects => {
+						 displayProjectsInModal(projects);
+						 // Appelle la fonction `displayProjectsInModal` pour afficher les projets récupérés dans la modale.
+					 })
+					 .catch(error => {
+						 console.error('Erreur lors de la récupération des projets pour la modale :', error);
+						 // Capture et affiche toute erreur survenue lors de la récupération des projets, par exemple si la requête échoue.
+					 });
+		 });
+
+		 closeModal.addEventListener("click", function() {
+			 modal.style.display = "none";
+			 // Ajoute un écouteur d'événement 'click' au bouton `closeModal` pour fermer la modale (cacher) en définissant son style `display` à "none".
+		 });
+
+		 window.addEventListener("click", function(event) {
+			 if (event.target === modal) {
+				 modal.style.display = "none";
+				 // Ajoute un écouteur d'événement 'click' à la fenêtre (document entier).
+				 // Si l'utilisateur clique en dehors de la modale (l'événement cible étant la modale elle-même),
+				 // la modale est fermée en définissant son style `display` à "none".
+			 }
+		 });
 	 });
 
 
