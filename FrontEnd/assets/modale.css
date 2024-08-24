@@ -39,3 +39,9 @@
     text-decoration: none;
     cursor: pointer;
 }
+
+.modal-gallery figure{
+    position: relative;
+}
+
+

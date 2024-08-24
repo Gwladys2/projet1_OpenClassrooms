@@ -73,12 +73,40 @@
 
 	<div id="modal" class="modal" style="display: none">
 		<div class="modal-content">
-			<span id="close-modal" class="close">&times; </span>
-			<h2> modifier</h2>
-			<div class="gallery" id="modal-gallery"></div>
-		</div>
+			<span id="close-modal" class="close">&times;</span>
+			<!-- Section des images existantes -->
+			<div id="image-gallery-section">
+				<h2>Modifier</h2>
+				<div class="gallery" id="modal-gallery"></div>
+				<button id="go-to-add-image">Ajouter une image</button>
+			</div>
 
+			<!-- Section pour ajouter une nouvelle image -->
+			<div id="add-image-section" style="display: none">
+				<h2>Ajouter une nouvelle image</h2>
+				<form id="add-image-form">
+					<label for="image">Image :</label>
+					<input type="file" id="image" name="image" accept="image/*" required>
+
+					<label for="title">Titre :</label>
+					<input type="text" id="title" name="title" required>
+
+					<label for="category">Catégorie :</label>
+					<select id="category" name="category" required>
+						<option value="1">Objets</option>
+						<option value="2">Appartements</option>
+						<option value="3">Hotels & restaurants</option>
+						<!-- Ajoutez d'autres options selon vos catégories -->
+					</select>
+
+					<button type="submit">Ajouter</button>
+				</form>
+				<button id="go-back-to-gallery">Retour</button>
+			</div>
+		</div>
 	</div>
+
+
 </main>
 
 <footer>
@@ -247,61 +275,55 @@
 
 
 	 function displayProjectsInModal(projects) {
-		 // Déclare une fonction nommée `displayProjectsInModal` qui prend en paramètre une variable `projects`.
-
 		 const modalGallery = document.getElementById('modal-gallery');
-		 // Récupère l'élément HTML avec l'ID 'modal-gallery' et le stocke dans la constante `modalGallery`.
-
 		 modalGallery.innerHTML = '';
-		 // Réinitialise le contenu HTML de `modalGallery`, en le vidant de tout élément précédent.
 
 		 if (Array.isArray(projects)) {
-			 // Vérifie si `projects` est un tableau à l'aide de la méthode `Array.isArray`.
-
 			 projects.forEach(project => {
-				 // Si `projects` est un tableau, utilise `forEach` pour parcourir chaque élément du tableau.
 
 				 if (project.title && typeof project.title === 'string' && project.imageUrl && typeof project.imageUrl === 'string') {
-					 // Vérifie si chaque projet a une propriété `title` de type chaîne de caractères
-					 // et une propriété `imageUrl` de type chaîne de caractères.
-
 					 const figure = document.createElement('figure');
-					 // Crée un nouvel élément HTML `figure` et le stocke dans la variable `figure`.
+					 figure.style.position="relative";
+					 figure.id=`project-${project.id}`;
 
 					 const img = document.createElement('img');
-					 // Crée un nouvel élément HTML `img` et le stocke dans la variable `img`.
-
 					 img.src = project.imageUrl;
-					 // Assigne l'URL de l'image `imageUrl` du projet à l'attribut `src` de l'élément `img`.
-
 					 img.alt = project.title;
-					 // Assigne le titre du projet à l'attribut `alt` de l'élément `img` pour l'accessibilité.
 
 					 const figcaption = document.createElement('figcaption');
-					 // Crée un nouvel élément HTML `figcaption` et le stocke dans la variable `figcaption`.
-
 					 figcaption.textContent = project.title;
-					 // Assigne le titre du projet au contenu texte de l'élément `figcaption`.
+
+					 const deleteButton=document.createElement('button');
+					 deleteButton.textContent="X";
+					 deleteButton.style.position="absolute";
+					 deleteButton.style.top="5px";
+					 deleteButton.style.backgroundColor="red";
+					 deleteButton.style.color="white";
+					 deleteButton.style.border="none";
+					 deleteButton.style.borderRadius="50%";
+					 deleteButton.style.cursor="pointer";
+					 deleteButton.style.marginLeft="50px"
+
+
+					 deleteButton.addEventListener('click', function (){
+						 deleteProject(project.id);
+
+					 });
 
 					 figure.appendChild(img);
-					 // Ajoute l'élément `img` comme enfant de l'élément `figure`.
-
 					 figure.appendChild(figcaption);
-					 // Ajoute l'élément `figcaption` comme enfant de l'élément `figure`.
-
+					 figure.appendChild(deleteButton);
 					 modalGallery.appendChild(figure);
-					 // Ajoute l'élément `figure` comme enfant de l'élément `modalGallery`, intégrant ainsi
-					 // l'image et la légende dans la galerie modale.
+
 
 				 } else {
 					 console.warn('Propriétés `title` ou `imageUrl` manquantes ou invalides pour un projet:', project);
-					 // Si le projet n'a pas de `title` ou de `imageUrl` valides, affiche un avertissement dans la console
-					 // indiquant les propriétés manquantes ou invalides.
+
 				 }
 			 });
 		 } else {
 			 console.error('Les données reçues ne sont pas un tableau:', projects);
-			 // Si `projects` n'est pas un tableau, affiche une erreur dans la console indiquant que les données ne sont pas valides.
+
 		 }
 	 }
 
@@ -349,19 +371,104 @@
 		 });
 
 		 closeModal.addEventListener("click", function() {
-			 modal.style.display = "none";
+			 modal.style.display = "none"
+			 fetchAndDisplayProjects();
+
 			 // Ajoute un écouteur d'événement 'click' au bouton `closeModal` pour fermer la modale (cacher) en définissant son style `display` à "none".
 		 });
 
 		 window.addEventListener("click", function(event) {
 			 if (event.target === modal) {
 				 modal.style.display = "none";
+				 fetchAndDisplayProjects();
+
 				 // Ajoute un écouteur d'événement 'click' à la fenêtre (document entier).
 				 // Si l'utilisateur clique en dehors de la modale (l'événement cible étant la modale elle-même),
 				 // la modale est fermée en définissant son style `display` à "none".
 			 }
 		 });
 	 });
+
+	 function deleteProject(projectId) {
+		 const authToken = localStorage.getItem('authToken');
+		 const url = `http://localhost:5678/api/works/${projectId}`;
+
+		 fetch(url, {
+			 method: 'DELETE',
+			 headers: {
+				 'Content-Type': 'application/json',
+				 'Authorization':  `Bearer ${authToken}`,
+
+			 }
+		 })
+				 .then(response => {
+					 if (!response.ok) {
+						 throw new Error(`Erreur lors de la suppression du projet: ${response.statusText}`);
+					 }
+					 document.getElementById(`project-${projectId}`).remove();
+				 })
+				 .then(data => {
+
+					 console.log('Projet supprimé avec succès');
+					 console.log('Projet supprimé avec succès', data);
+					 // Ici, vous pouvez mettre à jour l'interface utilisateur si nécessaire, par exemple, retirer l'élément du DOM
+					 document.getElementById(`project-${projectId}`).remove();
+				 })
+				 .catch(error => {
+					 console.error('Erreur:', error);
+				 });
+	         }
+
+	 // Aller à la section d'ajout d'image
+	 document.getElementById('go-to-add-image').addEventListener('click', function() {
+		 document.getElementById('image-gallery-section').style.display = 'none';
+		 document.getElementById('add-image-section').style.display = 'block';
+	 });
+
+	 // Retourner à la section de la galerie
+	 document.getElementById('go-back-to-gallery').addEventListener('click', function() {
+		 document.getElementById('image-gallery-section').style.display = 'block';
+		 document.getElementById('add-image-section').style.display = 'none';
+	 });
+
+	 // Soumettre le formulaire et ajouter une image
+	 document.getElementById('add-image-form').addEventListener('submit', function(event) {
+		 event.preventDefault();
+
+		 const formData = new FormData();
+		 const imageInput = document.getElementById('image').files[0];
+		 const titleInput = document.getElementById('title').value;
+		 const categoryInput = document.getElementById('category').value;
+
+		 formData.append('image', imageInput);
+		 formData.append('title', titleInput);
+		 formData.append('category', categoryInput);
+
+		 fetch('http://localhost:5678/api/works', {
+			 method: 'POST',
+			 headers: {
+				 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+			 },
+			 body: formData
+		 })
+				 .then(response => {
+					 if (!response.ok) {
+						 throw new Error('Erreur lors de l\'envoi de l\'image : ' + response.status);
+					 }
+					 return response.json();
+				 })
+				 .then(data => {
+					 alert('Image ajoutée avec succès !');
+					 document.getElementById('modal').style.display = 'none';
+					 // Rafraîchir la galerie ici si nécessaire
+					 fetchAndDisplayProjects();
+				 })
+				 .catch(error => {
+					 console.error('Erreur:', error);
+					 alert('Erreur lors de l\'ajout de l\'image.');
+				 });
+	 });
+
 
 
  </script>
