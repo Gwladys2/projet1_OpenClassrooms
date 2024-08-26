@@ -78,18 +78,28 @@
 			<div id="image-gallery-section">
 				<h2>Modifier</h2>
 				<div class="gallery" id="modal-gallery"></div>
-				<button id="go-to-add-image">Ajouter une image</button>
+				<button id="go-to-add-image" class="add-button">Ajouter une image</button>
 			</div>
 
 			<!-- Section pour ajouter une nouvelle image -->
-			<div id="add-image-section" style="display: none">
+			<div id="add-image-section" class="image-form" style="display: none">
 				<h2>Ajouter une nouvelle image</h2>
-				<form id="add-image-form">
-					<label for="image">Image :</label>
-					<input type="file" id="image" name="image" accept="image/*" required>
+				<form id="add-image-form" >
 
-					<label for="title">Titre :</label>
-					<input type="text" id="title" name="title" required>
+
+					<label for="image">Image :</label>
+					<!-- Bouton "+" -->
+					<button type="button" id="upload-button" style="font-size: 24px; cursor: pointer;">+</button>
+					<!-- Input de type file caché -->
+					<input type="file" id="image" name="image" accept="image/*" style="display: none;" required>
+					<!-- Conteneur pour l'aperçu de l'image -->
+					<div id="image-preview" style="margin-top: 20px;">
+						<img id="preview-img" src="" alt="Aperçu de l'image" style="display: none; max-width: 100%; height: auto;" />
+
+						<label for="title">Titre :</label>
+					    <input type="text" id="title" name="title" required>
+
+
 
 					<label for="category">Catégorie :</label>
 					<select id="category" name="category" required>
@@ -100,7 +110,9 @@
 					</select>
 
 					<button type="submit">Ajouter</button>
+					</div>
 				</form>
+				<div id="message2" style="display: none; margin-top:10px"></div>
 				<button id="go-back-to-gallery">Retour</button>
 			</div>
 		</div>
@@ -374,6 +386,7 @@
 			 modal.style.display = "none"
 			 fetchAndDisplayProjects();
 
+
 			 // Ajoute un écouteur d'événement 'click' au bouton `closeModal` pour fermer la modale (cacher) en définissant son style `display` à "none".
 		 });
 
@@ -429,6 +442,7 @@
 	 document.getElementById('go-back-to-gallery').addEventListener('click', function() {
 		 document.getElementById('image-gallery-section').style.display = 'block';
 		 document.getElementById('add-image-section').style.display = 'none';
+
 	 });
 
 	 // Soumettre le formulaire et ajouter une image
@@ -458,18 +472,47 @@
 					 return response.json();
 				 })
 				 .then(data => {
-					 alert('Image ajoutée avec succès !');
-					 document.getElementById('modal').style.display = 'none';
+					document.getElementById('message2').style.display='block';
+					document.getElementById('message2').style.color='green';
+					document.getElementById('message2').textContent='Image ajoutée avec succès!';
+
 					 // Rafraîchir la galerie ici si nécessaire
 					 fetchAndDisplayProjects();
 				 })
 				 .catch(error => {
+
+					 document.getElementById('message2').style.display='block';
+					 document.getElementById('message2').style.color='red';
+					 document.getElementById('message2').textContent='Erreur lors de l ajout de votre image, veuillez réessayer.';
 					 console.error('Erreur:', error);
-					 alert('Erreur lors de l\'ajout de l\'image.');
+
 				 });
 	 });
 
 
+	 const uploadButton = document.getElementById('upload-button');
+	 const imageInput = document.getElementById('image');
+	 const previewImg = document.getElementById('preview-img');
+	 const imagePreview = document.getElementById('image-preview');
+
+	 // Lorsque le bouton est cliqué, on déclenche le clic sur l'input file
+	 uploadButton.addEventListener('click', () => {
+		 imageInput.click();
+	 });
+
+	 // Affiche l'aperçu de l'image sélectionnée
+	 imageInput.addEventListener('change', () => {
+		 if (imageInput.files && imageInput.files[0]) {
+			 const reader = new FileReader();
+
+			 reader.onload = (e) => {
+				 previewImg.src = e.target.result; // Définit la source de l'image prévisualisée
+				 previewImg.style.display = 'block'; // Affiche l'image prévisualisée
+			 };
+
+			 reader.readAsDataURL(imageInput.files[0]); // Lit le fichier comme une URL de données
+		 }
+	 });
 
  </script>
 </body>
